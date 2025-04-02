@@ -5,6 +5,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 export default defineConfig({
   plugins: [svelte()],
   server: {
-    port: 8081
-  }
+    host: '0.0.0.0',
+    port: 8081,
+    allowedHosts: ['sakutai.net']  }
 })

@@ -3,6 +3,8 @@
 	import { onMount } from 'svelte';
 
 	let prefecture = 'kanagawa'; // デフォルトの都道府県
+	// ドメイン名を定数として定義
+	const API_DOMAIN = 'sakutai.net';
 	let model = 'v0a'; // モデルを v0a に固定
 	let oxData = {}; // 初期値を空のオブジェクトに変更
 	let loading = false;
@@ -46,8 +48,7 @@
 				formattedDatehour = selectedDateTime;
 			}
 			const response = await axios.get(
-				// `http://172.23.78.71:8087/ox/${model}/${prefecture}/${formattedDatehour}`
-				`http://192.168.3.234:8087/ox/${model}/${prefecture}/${formattedDatehour}`
+				`http://${API_DOMAIN}:8087/ox/${model}/${prefecture}/${formattedDatehour}`
 			);
 
 			// データの整形
@@ -78,8 +79,7 @@
 		ptableError = null;
 		try {
 			const response = await axios.get(
-				// `http://172.23.78.71:8087/ptable/${model}`
-				`http://192.168.3.234:8087/ptable/${model}`
+				`http://${API_DOMAIN}:8087/ptable/${model}`
 			);
 			// JSON データを解析して、行と列のデータに変換
 			const jsonData = response.data;

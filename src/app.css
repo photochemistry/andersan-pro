@@ -1,11 +1,12 @@
+/* src/app.css */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color-scheme: light; /* color-schemeをlightに設定 */
+  /* color: rgba(255, 255, 255, 0.87);  削除またはコメントアウト */
+  /* background-color: #242424; 削除またはコメントアウト */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -28,6 +29,25 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+}
+
+/* ライトモードを強制 */
+body {
+  background-color: white; /* 背景色を白に設定 */
+  color: black; /* 文字色を黒に設定 */
+  margin: 0; /* デフォルトのマージンを削除 */
+  font-family: sans-serif; /* フォントファミリーを設定 */
+}
+
+/* ダークモードの設定を上書き */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: white; /* 背景色を白に設定 */
+    color: black; /* 文字色を黒に設定 */
+  }
+  select, option {
+    color: black;
+  }
 }
 
 h1 {
@@ -76,4 +96,12 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+  select, option {
+    color: black;
+  }
+}
+
+/* セレクタのスタイル */
+select, option {
+  color: black; /* 文字色を黒に設定 */
 }
