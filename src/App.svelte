@@ -3,8 +3,6 @@
 	import { onMount } from 'svelte';
 
 	let prefecture = 'kanagawa'; // デフォルトの都道府県
-	// ドメイン名を定数として定義
-	const API_DOMAIN = 'sakutai.net';
 	let model = 'v0a'; // モデルを v0a に固定
 	let oxData = {}; // 初期値を空のオブジェクトに変更
 	let loading = false;
@@ -16,6 +14,7 @@
 	let ptableRows = []; // 確率表の行データを保持する変数
 	let ptableColumns = []; // 確率表のカラムデータを保持する変数
 	const zValue = 120; // z の値を 120 に固定
+	let addresses = {}; // 住所データを保持する変数
 
 	// 日時を ISO 8601 形式に変換する関数 (JST に対応)
 	function getISO8601(date) {
@@ -48,7 +47,7 @@
 				formattedDatehour = selectedDateTime;
 			}
 			const response = await axios.get(
-				`http://${API_DOMAIN}:8087/ox/${model}/${prefecture}/${formattedDatehour}`
+				`/api/ox/${model}/${prefecture}/${formattedDatehour}`
 			);
 
 			// データの整形
@@ -56,6 +55,12 @@
 			const data = all_data.data;
 
 			oxData = data; // data をそのまま oxData に代入
+
+			if (oxData && oxData.lon && oxData.lat) {
+				for (let i = 0; i < oxData.lon.length; i++) {
+					await getAddress(oxData.lon[i], oxData.lat[i], i);
+				}
+			}
 
 		} catch (err) {
 			if (err.response) {
@@ -79,7 +84,7 @@
 		ptableError = null;
 		try {
 			const response = await axios.get(
-				`http://${API_DOMAIN}:8087/ptable/${model}`
+				`/api/ptable/${model}`
 			);
 			// JSON データを解析して、行と列のデータに変換
 			const jsonData = response.data;
@@ -165,10 +170,25 @@
 
 		return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 	}
+
+	async function getAddress(lon, lat, index) {
+		try {
+			const response = await axios.get(`https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=${lon}&lat=${lat}`);
+			// 住所の取得が成功した場合
+			if (response.data && response.data.results && response.data.results.length > 0) {
+				addresses[index] = response.data.results[0]; // 最初の結果を使用
+			} else {
+				addresses[index] = '住所が見つかりません';
+			}
+		} catch (err) {
+			console.error('住所取得エラー:', err);
+			addresses[index] = '住所取得エラー';
+		}
+	}
 </script>
 
 <main>
-	<h1>OX 予測データ</h1>
+	<h1>光化学オキシダント予測</h1>
 
 	<div>
 		<label for="prefecture">都道府県:</label>
@@ -200,6 +220,7 @@
 						<th>XY</th>
 						<th>経度</th>
 						<th>緯度</th>
+						<th>住所</th>
 						{#each Array.from({ length: 24 }, (_, i) => i + 1) as hour}
 							<th>+{hour}</th>
 						{/each}
@@ -211,6 +232,7 @@
 							<td>{oxData.XY[i]}</td>
 							<td>{oxData.lon[i].toFixed(2)}</td>
 							<td>{oxData.lat[i].toFixed(2)}</td>
+							<td>{addresses[i] ? addresses[i].address : '住所取得中...'}</td>
 							{#each Array.from({ length: 24 }, (_, j) => j + 1) as hour}
 								<td
 									class:highlight={Math.round(oxData[`+${hour}`][i]) >= 120}
@@ -241,7 +263,7 @@
 	{:else if ptableError}
 		<p style="color: red;">確率表エラー: {ptableError}</p>
 	{:else if ptable}
-		<h2>OX 予測値と実測値の関係</h2>
+		<!-- <h2>OX 予測値と実測値の関係</h2>
 		<table>
 			<thead>
 				<tr>
@@ -263,7 +285,7 @@
 					</tr>
 				{/each}
 			</tbody>
-		</table>
+		</table> -->
 	{/if}
 </main>
 
